@@ -6,9 +6,10 @@ port = 12800
 connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 connection.connect((host, port))
 print("Connection established with the server on port {}".format(port))
+print("For close connection write 'end'")
 
 sendingMesg = ""
-while sendingMesg != b"fin":
+while sendingMesg != b"end":
     sendingMesg = input(">>> ")
     # Sometimes goes crash with special char
     sendingMesg = sendingMesg.encode()
