@@ -3,6 +3,7 @@ import socket
 import time
 import select
 
+serverUp = True
 class ClientThread(threading.Thread):
 
     def __init__(self, host, port, clientsocket):
@@ -15,9 +16,20 @@ class ClientThread(threading.Thread):
 
     def run(self): 
         print("Connection of %s %s" % (self.host, self.port, ))
-        request = self.clientsocket.recv(2048)
-        print(request.decode())
-        self.clientsocket.send("Server ok -".encode())
+        while serverUp == True:
+            try:
+                request = self.clientsocket.recv(2048)
+            except Exception as e:
+                pass
+            if request.decode() != "end":
+                    print(request.decode())
+                    try:
+                        self.clientsocket.send("Server ok -".encode())
+                    except Exception as e:
+                        print("[-] Thread killed for %s %s" % (self.host, self.port))
+                        self.clientsocket.close()
+                        self.killed = True
+                        break
 
 
 port = 1111
@@ -25,9 +37,6 @@ port = 1111
 mainConnection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 mainConnection.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 mainConnection.bind(("",1111))
-
-clientConnected = []
-serverUp = True
 
 while serverUp == True:
     mainConnection.listen(10)
