@@ -22,5 +22,3 @@ while sendingMesg != b"end":
 
 if sendingMesg == b"end":
     print("Closing connection")
-
-connection.shutdown()
