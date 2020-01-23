@@ -4,18 +4,19 @@ import select
 host = ''
 port = 12800
 
-connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-connection.bind((host,port))
-connection.listen(5)
+mainConnection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+mainConnection.bind((host,port))
+mainConnection.listen(5)
 
 print("Server up, listen on port {}".format(port))
 
 clientConnected = []
 serverUp = True
 
+
 while serverUp == True:
     # Testing connection request, check for 50ms
-    request, wlist, xlist = select.select([connection], [], [], 0.05)
+    request, wlist, xlist = select.select([mainConnection], [], [], 0.05)
 
     for connection in request:
         connectionClient, infoConnection = connection.accept()
@@ -31,12 +32,16 @@ while serverUp == True:
         for client in clientToRead:
             receivingMesg = connectionClient.recv(1024)
             print("Sending from {} : ".format(infoConnection)+receivingMesg.decode())
-            connectionClient.send(b"-- server receiving ok --")
-            if receivingMesg == "end":
+            if receivingMesg != b"end":
+                # Pass into allways
+                connectionClient.send("-- Server message receiving is : \"".encode() + receivingMesg + "\" --".encode())
+            if receivingMesg == b"end":
                 serverUp = False
 
-print("Closing connection")
-for client in clientConnected:
-    client.close()
+if serverUp == False:
+    print("Closing connection")
 
-connection.close()
+    for client in clientConnected:
+        client.close()
+
+    mainConnection.close()
