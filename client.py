@@ -1,7 +1,10 @@
 import socket
+from time import gmtime, strftime
 
 host = 'localhost'
 port = 12800
+time = strftime("%H:%M:%S", gmtime()).encode()
+
 
 connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 connection.connect((host, port))
@@ -13,7 +16,7 @@ while sendingMesg != b"end":
     sendingMesg = input(">>> ")
     # Sometimes goes crash with special char
     sendingMesg = sendingMesg.encode()
-    connection.send(sendingMesg)
+    connection.send(sendingMesg + " à ".encode() + time)
     receivingMsg = connection.recv(1024)
     print(receivingMsg.decode())
 
