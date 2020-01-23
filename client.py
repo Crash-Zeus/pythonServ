@@ -1,8 +1,9 @@
 import socket
-from time import gmtime, strftime
+import time
+from time import gmtime, strftime, time
 
 host = 'localhost'
-port = 12800
+port = 1111
 time = strftime("%H:%M:%S", gmtime()).encode()
 
 
@@ -14,11 +15,12 @@ print("For close connection write 'end'")
 sendingMesg = ""
 while sendingMesg != b"end":
     sendingMesg = input(">>> ")
-    # Sometimes goes crash with special char
     sendingMesg = sendingMesg.encode()
     connection.send(sendingMesg + " à ".encode() + time)
     receivingMsg = connection.recv(1024)
     print(receivingMsg.decode())
 
-print("Closing connection")
-connection.close()
+if sendingMesg == b"end":
+    print("Closing connection")
+
+connection.shutdown()

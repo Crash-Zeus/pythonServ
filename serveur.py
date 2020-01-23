@@ -1,47 +1,37 @@
+import threading
 import socket
+import time
 import select
 
-host = ''
-port = 12800
+class ClientThread(threading.Thread):
+
+    def __init__(self, host, port, clientsocket):
+
+        threading.Thread.__init__(self)
+        self.host = host
+        self.port = port
+        self.clientsocket = clientsocket
+        print("[+] New thread for %s %s" % (self.host, self.port, ))
+
+    def run(self): 
+        print("Connection of %s %s" % (self.host, self.port, ))
+        request = self.clientsocket.recv(2048)
+        print(request.decode())
+        self.clientsocket.send("Server ok -".encode())
+
+
+port = 1111
 
 mainConnection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-mainConnection.bind((host,port))
-mainConnection.listen(5)
-
-print("Server up, listen on port {}".format(port))
+mainConnection.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+mainConnection.bind(("",1111))
 
 clientConnected = []
 serverUp = True
 
-
 while serverUp == True:
-    # Testing connection request, check for 50ms
-    request, wlist, xlist = select.select([mainConnection], [], [], 0.05)
-
-    for connection in request:
-        connectionClient, infoConnection = connection.accept()
-        # Store connection in client conneted list
-        clientConnected.append(connectionClient)
-
-    clientToRead = []
-    try:
-        clientToRead, wlist, xlist = select.select(clientConnected, [], [], 0.05)
-    except select.error:
-        pass
-    else:
-        for client in clientToRead:
-            receivingMesg = connectionClient.recv(1024)
-            print("Sending from {} : ".format(infoConnection)+receivingMesg.decode())
-            if receivingMesg != b"end":
-                # Pass into allways
-                connectionClient.send("-- Server message receiving is : \"".encode() + receivingMesg + "\" --".encode())
-            if receivingMesg == b"end":
-                serverUp = False
-
-if serverUp == False:
-    print("Closing connection")
-
-    for client in clientConnected:
-        client.close()
-
-    mainConnection.close()
+    mainConnection.listen(10)
+    print( "listening on %s" % (port))
+    (clientsocket, (host, port)) = mainConnection.accept()
+    newthread = ClientThread(host, port, clientsocket)
+    newthread.start()
