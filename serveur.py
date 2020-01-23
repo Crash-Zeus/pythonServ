@@ -39,8 +39,11 @@ mainConnection.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 mainConnection.bind(("",1111))
 
 while serverUp == True:
-    mainConnection.listen(10)
-    print( "listening on %s" % (port))
-    (clientsocket, (host, port)) = mainConnection.accept()
-    newthread = ClientThread(host, port, clientsocket)
-    newthread.start()
+    try:
+        mainConnection.listen(10)
+        print( "listening on %s" % (port))
+        (clientsocket, (host, port)) = mainConnection.accept()
+        newthread = ClientThread(host, port, clientsocket)
+        newthread.start()
+    except KeyboardInterrupt:
+        newthread._stop()
