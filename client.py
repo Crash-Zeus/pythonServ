@@ -3,7 +3,7 @@ import time
 from time import gmtime, strftime, time
 
 host = 'localhost'
-port = 1111
+port = 1112
 time = strftime("%H:%M:%S", gmtime()).encode()
 
 
