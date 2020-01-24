@@ -33,33 +33,33 @@ class ClientThread(threading.Thread):
                     break
 
 
-serverUp = True
+if __name__ == "__main__":
+    serverUp = True
+    port = 1112
 
-port = 1112
+    mainConnection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    mainConnection.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    mainConnection.bind(("", port))
 
-mainConnection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-mainConnection.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-mainConnection.bind(("", port))
-
-while serverUp == True:
-    try:
-        mainConnection.listen(10)
-        print("listening on %s" % (port))
-        (clientsocket, (host, port)) = mainConnection.accept()
-        newthread = ClientThread(host, port, clientsocket)
-        newthread.start()
-        if newthread is None:
-            row = input(">>> ")
-            if row == "stop":
-                try:
-                    newthread._stop()
-                except Exception:
-                    pass
-                serverUp = False
-    except KeyboardInterrupt:
+    while serverUp == True:
         try:
-            newthread._stop()
-        except Exception:
-            # Catach & pass exception with none thread open
-            pass
-        serverUp = False
+            mainConnection.listen(10)
+            print("listening on %s" % (port))
+            (clientsocket, (host, port)) = mainConnection.accept()
+            newthread = ClientThread(host, port, clientsocket)
+            newthread.start()
+            if newthread is None:
+                row = input(">>> ")
+                if row == "stop":
+                    try:
+                        newthread._stop()
+                    except Exception:
+                        pass
+                    serverUp = False
+        except KeyboardInterrupt:
+            try:
+                newthread._stop()
+            except Exception:
+                # Catach & pass exception with none thread open
+                pass
+            serverUp = False
