@@ -5,9 +5,10 @@ import time
 import select
 import tkinter as tk
 
+host = ''
+port = 1111
 
 class ClientThread(threading.Thread):
-
     def __init__(self, host, port, clientsocket):
         threading.Thread.__init__(self)
         self.host = host
@@ -33,7 +34,6 @@ class ClientThread(threading.Thread):
                     self.killed = True
                     break
 
-
 class Application(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
@@ -53,36 +53,46 @@ class Application(tk.Frame):
         self.quit.pack(side="bottom")
 
     def loading(self, valmin, valmax):
+        begin = "["
+        close = "]"
         bar = [
-            " [=     ]",
-            " [ =    ]",
-            " [  =   ]",
-            " [   =  ]",
-            " [    = ]",
-            " [     =]",
-            " [    = ]",
-            " [   =  ]",
-            " [  =   ]",
-            " [ =    ]",
+            " =     ",
+            "  =    ",
+            "   =   ",
+            "    =  ",
+            "     = ",
+            "      =",
+            "     = ",
+            "    =  ",
+            "   =   ",
+            "  =    ",
         ]
         
         while valmin != valmax:
-            print(bar[valmin % len(bar)], end="\r")
+            print(Fore.WHITE+begin+Fore.RED+bar[valmin % len(bar)]+Fore.WHITE+close, end="\r")
             time.sleep(.2)
             valmin += 1
         else:
-            print("")
-            print(Back.GREEN+"Server up !")
-    # On click start server
+            print(Fore.GREEN+"Server up !"+Style.RESET_ALL)
 
     def startServ(self):
         print("Starting server ")
         self.loading(0,5)
+        serverUp = True
+        self.start.destroy()
+        if serverUp == True:
+            self.started = tk.Label(self, text="Server online on port %s" % port)
+            self.started.pack(side="top")
+
 
 
         
 
-
-root = tk.Tk()
-app = Application(master=root)
-app.mainloop()
+if __name__ == '__main__':
+    root = tk.Tk()
+    root.title("[PYTHON] server socket v0.1")
+    # "window width x window height + position right + position down"
+    root.eval('tk::PlaceWindow %s center' % root.winfo_pathname(root.winfo_id()))
+    root.minsize(400,200)
+    app = Application(master=root)
+    app.mainloop()
