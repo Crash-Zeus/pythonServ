@@ -62,4 +62,6 @@ if __name__ == "__main__":
             except Exception:
                 # Catach & pass exception with none thread open
                 pass
+            print()
+            print("Closing server")
             serverUp = False
