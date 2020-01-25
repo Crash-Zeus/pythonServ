@@ -1,3 +1,4 @@
+from colorama import Fore, Back, Style
 import threading
 import socket
 import time
@@ -14,7 +15,9 @@ class ClientThread(threading.Thread):
         self.clientsocket = clientsocket
         print("[+] New thread for %s %s" % (self.host, self.port, ))
 
+
     def run(self):
+        self.loading(0, 10)
         print("Connection of %s %s" % (self.host, self.port, ))
         while serverUp == True:
             try:
@@ -32,11 +35,34 @@ class ClientThread(threading.Thread):
                     self.killed = True
                     break
 
+def loading(valmin, valmax):
+    begin = "["
+    close = "]"
+    bar = [
+        " =     ",
+        "  =    ",
+        "   =   ",
+        "    =  ",
+        "     = ",
+        "      =",
+        "     = ",
+        "    =  ",
+        "   =   ",
+        "  =    ",
+    ]
+    while valmin != valmax:
+        print(Fore.WHITE+begin+Fore.RED+bar[valmin % len(bar)]+Fore.WHITE+close, end="\r")
+        time.sleep(.1)
+        valmin += 1
+    else:
+        print(Fore.GREEN+"Server up !"+Style.RESET_ALL)
+
 
 if __name__ == "__main__":
     serverUp = True
     port = 1112
-
+    if serverUp == True:
+        loading(0, 10)
     mainConnection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     mainConnection.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     mainConnection.bind(("", port))
