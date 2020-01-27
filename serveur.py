@@ -45,6 +45,7 @@ while serverUp == True:
     try:
         mainConnection.listen(10)
         print("listening on %s" % (port))
+        # Séparer sur un thread différent pour l'écoute en arrière plan avec tkinter
         (clientsocket, (host, port)) = mainConnection.accept()
         newthread = ClientThread(host, port, clientsocket)
         newthread.start()
