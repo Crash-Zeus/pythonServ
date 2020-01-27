@@ -1,3 +1,4 @@
+from colorama import Fore, Back, Style
 import threading
 import socket
 import time
@@ -14,7 +15,9 @@ class ClientThread(threading.Thread):
         self.clientsocket = clientsocket
         print("[+] New thread for %s %s" % (self.host, self.port, ))
 
+
     def run(self):
+        self.loading(0, 10)
         print("Connection of %s %s" % (self.host, self.port, ))
         while serverUp == True:
             try:
@@ -32,35 +35,60 @@ class ClientThread(threading.Thread):
                     self.killed = True
                     break
 
+def loading(valmin, valmax):
+    begin = "["
+    close = "]"
+    bar = [
+        " =     ",
+        "  =    ",
+        "   =   ",
+        "    =  ",
+        "     = ",
+        "      =",
+        "     = ",
+        "    =  ",
+        "   =   ",
+        "  =    ",
+    ]
+    while valmin != valmax:
+        print(Fore.WHITE+begin+Fore.RED+bar[valmin % len(bar)]+Fore.WHITE+close, end="\r")
+        time.sleep(.1)
+        valmin += 1
+    else:
+        print(Fore.GREEN+"Server up !"+Style.RESET_ALL)
 
-serverUp = True
 
-port = 1112
+if __name__ == "__main__":
+    serverUp = True
+    port = 1112
+    if serverUp == True:
+        loading(0, 10)
+    mainConnection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    mainConnection.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    mainConnection.bind(("", port))
 
-mainConnection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-mainConnection.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-mainConnection.bind(("", port))
-
-while serverUp == True:
-    try:
-        mainConnection.listen(10)
-        print("listening on %s" % (port))
-        # Séparer sur un thread différent pour l'écoute en arrière plan avec tkinter
-        (clientsocket, (host, port)) = mainConnection.accept()
-        newthread = ClientThread(host, port, clientsocket)
-        newthread.start()
-        if newthread is None:
-            row = input(">>> ")
-            if row == "stop":
-                try:
-                    newthread._stop()
-                except Exception:
-                    pass
-                serverUp = False
-    except KeyboardInterrupt:
+    while serverUp == True:
         try:
-            newthread._stop()
-        except Exception:
-            # Catach & pass exception with none thread open
-            pass
-        serverUp = False
+            mainConnection.listen(10)
+            print("listening on %s" % (port))
+            # Séparer sur un thread différent pour l'écoute en arrière plan avec tkinter
+            (clientsocket, (host, port)) = mainConnection.accept()
+            newthread = ClientThread(host, port, clientsocket)
+            newthread.start()
+            if newthread is None:
+                row = input(">>> ")
+                if row == "stop":
+                    try:
+                        newthread._stop()
+                    except Exception:
+                        pass
+                    serverUp = False
+        except KeyboardInterrupt:
+            try:
+                newthread._stop()
+            except Exception:
+                # Catach & pass exception with none thread open
+                pass
+            print()
+            print("Closing server")
+            serverUp = False
