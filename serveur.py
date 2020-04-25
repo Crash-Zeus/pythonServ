@@ -17,7 +17,7 @@ class ClientThread(threading.Thread):
 
 
     def run(self):
-        self.loading(0, 10)
+        loading(0, 10)
         print("Connection of %s %s" % (self.host, self.port, ))
         while serverUp == True:
             try:
